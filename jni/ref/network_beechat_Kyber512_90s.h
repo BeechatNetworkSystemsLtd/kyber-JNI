@@ -1,4 +1,12 @@
+#ifndef KEM_H
+#define KEM_H
+
 #include <jni.h>
+#include <stdint.h>
+#include "params.h"
+
+#define UNUSED(x) (void)(x)
+
 /* Header for class network_beechat_Kyber512_90s */
 
 #ifndef _Included_network_beechat_Kyber512_90s
@@ -34,3 +42,5 @@ JNIEXPORT jint JNICALL Java_network_beechat_Kyber512_190s_crypto_1kem_1dec
 }
 #endif
 #endif
+#endif
+
