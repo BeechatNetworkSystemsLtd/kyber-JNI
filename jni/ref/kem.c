@@ -21,17 +21,35 @@
 * Returns 0 (success)
 **************************************************/
 JNIEXPORT jint JNICALL Java_network_beechat_Kyber512_crypto_1kem_1keypair
-    (JNIEnv *env, jobject thisObject, jcharArray pk, jcharArray sk)
+    (JNIEnv *env, jobject thisObject, jbyteArray pk, jbyteArray sk)
 {
   size_t i;
-  UNUSED(env);
+  uint8_t _pk[KYBER_PUBLICKEYBYTES] = { 0 };
+  uint8_t _sk[KYBER_SECRETKEYBYTES] = { 0 };
+  jbyte _pkj[KYBER_PUBLICKEYBYTES] = { 0 };
+  jbyte _skj[KYBER_SECRETKEYBYTES] = { 0 };
+
   UNUSED(thisObject);
-  indcpa_keypair((uint8_t *)pk, (uint8_t *)sk);
+
+  indcpa_keypair((uint8_t *)_pk, (uint8_t *)_sk);
   for(i=0;i<KYBER_INDCPA_PUBLICKEYBYTES;i++)
-    ((uint8_t *)sk)[i+KYBER_INDCPA_SECRETKEYBYTES] = ((uint8_t *)pk)[i];
-  hash_h(((uint8_t *)sk)+KYBER_SECRETKEYBYTES-2*KYBER_SYMBYTES, ((uint8_t *)pk), KYBER_PUBLICKEYBYTES);
+    ((uint8_t *)_sk)[i+KYBER_INDCPA_SECRETKEYBYTES] = ((uint8_t *)_pk)[i];
+  hash_h(((uint8_t *)_sk)+KYBER_SECRETKEYBYTES-2*KYBER_SYMBYTES, ((uint8_t *)_pk), KYBER_PUBLICKEYBYTES);
   /* Value z for pseudo-random output on reject */
-  randombytes(((uint8_t *)sk)+KYBER_SECRETKEYBYTES-KYBER_SYMBYTES, KYBER_SYMBYTES);
+  randombytes(((uint8_t *)_sk)+KYBER_SECRETKEYBYTES-KYBER_SYMBYTES, KYBER_SYMBYTES);
+
+  for (i = 0; i < KYBER_PUBLICKEYBYTES; i++)
+  {
+    _pkj[i] = _pk[i];
+  }
+  for (i = 0; i < KYBER_SECRETKEYBYTES; i++)
+  {
+    _skj[i] = _sk[i];
+  }
+
+  (*env)->SetByteArrayRegion(env, pk, 0, KYBER_PUBLICKEYBYTES, _pkj);
+  (*env)->SetByteArrayRegion(env, sk, 0, KYBER_SECRETKEYBYTES, _skj);
+
   return 0;
 }
 
@@ -51,12 +69,27 @@ JNIEXPORT jint JNICALL Java_network_beechat_Kyber512_crypto_1kem_1keypair
 * Returns 0 (success)
 **************************************************/
 JNIEXPORT jint JNICALL Java_network_beechat_Kyber512_crypto_1kem_1enc
-    (JNIEnv *env, jobject thisObject, jcharArray ct, jcharArray ss, jcharArray pk)
+    (JNIEnv *env, jobject thisObject, jbyteArray ct, jbyteArray ss, jbyteArray pk)
 {
   uint8_t buf[2*KYBER_SYMBYTES];
   /* Will contain key, coins */
   uint8_t kr[2*KYBER_SYMBYTES];
-  UNUSED(env);
+
+  uint8_t _pk[KYBER_PUBLICKEYBYTES] = { 0 };
+  jbyte _pkj[KYBER_PUBLICKEYBYTES] = { 0 };
+  uint8_t _ct[KYBER_CIPHERTEXTBYTES] = { 0 };
+  jbyte _ctj[KYBER_CIPHERTEXTBYTES] = { 0 };
+  uint8_t _ss[KYBER_SSBYTES] = { 0 };
+  jbyte _ssj[KYBER_SSBYTES] = { 0 };
+
+  (*env)->GetByteArrayRegion(env, pk, 0, KYBER_PUBLICKEYBYTES, _pkj);
+  (*env)->GetByteArrayRegion(env, ct, 0, KYBER_CIPHERTEXTBYTES, _ctj);
+  (*env)->GetByteArrayRegion(env, ss, 0, KYBER_SSBYTES, _ssj);
+
+  for (size_t ii = 0; ii < KYBER_PUBLICKEYBYTES; ii++) _pk[ii] = _pkj[ii];
+  for (size_t ii = 0; ii < KYBER_CIPHERTEXTBYTES; ii++) _ct[ii] = _ctj[ii];
+  for (size_t ii = 0; ii < KYBER_SSBYTES; ii++) _ss[ii] = _ssj[ii];
+
   UNUSED(thisObject);
 
   randombytes(buf, KYBER_SYMBYTES);
@@ -64,16 +97,22 @@ JNIEXPORT jint JNICALL Java_network_beechat_Kyber512_crypto_1kem_1enc
   hash_h(buf, buf, KYBER_SYMBYTES);
 
   /* Multitarget countermeasure for coins + contributory KEM */
-  hash_h(buf+KYBER_SYMBYTES, (uint8_t *)pk, KYBER_PUBLICKEYBYTES);
+  hash_h(buf+KYBER_SYMBYTES, _pk, KYBER_PUBLICKEYBYTES);
   hash_g(kr, buf, 2*KYBER_SYMBYTES);
 
   /* coins are in kr+KYBER_SYMBYTES */
-  indcpa_enc((uint8_t *)ct, buf, (uint8_t *)pk, kr+KYBER_SYMBYTES);
+  indcpa_enc(_ct, buf, _pk, kr+KYBER_SYMBYTES);
 
   /* overwrite coins in kr with H(c) */
-  hash_h(kr+KYBER_SYMBYTES, (uint8_t *)ct, KYBER_CIPHERTEXTBYTES);
+  hash_h(kr+KYBER_SYMBYTES, _ct, KYBER_CIPHERTEXTBYTES);
   /* hash concatenation of pre-k and H(c) to k */
-  kdf((uint8_t *)ss, kr, 2*KYBER_SYMBYTES);
+  kdf(_ss, kr, 2*KYBER_SYMBYTES);
+  for (size_t ii = 0; ii < KYBER_PUBLICKEYBYTES; ii++) _pkj[ii] = _pk[ii];
+  for (size_t ii = 0; ii < KYBER_CIPHERTEXTBYTES; ii++) _ctj[ii] = _ct[ii];
+  for (size_t ii = 0; ii < KYBER_SSBYTES; ii++) _ssj[ii] = _ss[ii];
+  (*env)->SetByteArrayRegion(env, pk, 0, KYBER_PUBLICKEYBYTES, _pkj);
+  (*env)->SetByteArrayRegion(env, ct, 0, KYBER_CIPHERTEXTBYTES, _ctj);
+  (*env)->SetByteArrayRegion(env, ss, 0, KYBER_SSBYTES, _ssj);
   return 0;
 }
 
@@ -95,7 +134,7 @@ JNIEXPORT jint JNICALL Java_network_beechat_Kyber512_crypto_1kem_1enc
 * On failure, ss will contain a pseudo-random value.
 **************************************************/
 JNIEXPORT jint JNICALL Java_network_beechat_Kyber512_crypto_1kem_1dec
-  (JNIEnv *env, jobject thisObject, jcharArray ss, jcharArray ct, jcharArray sk)
+  (JNIEnv *env, jobject thisObject, jbyteArray ss, jbyteArray ct, jbyteArray sk)
 {
   size_t i;
   int fail;
@@ -103,30 +142,53 @@ JNIEXPORT jint JNICALL Java_network_beechat_Kyber512_crypto_1kem_1dec
   /* Will contain key, coins */
   uint8_t kr[2*KYBER_SYMBYTES];
   uint8_t cmp[KYBER_CIPHERTEXTBYTES];
-  const uint8_t *pk = ((uint8_t *)sk)+KYBER_INDCPA_SECRETKEYBYTES;
-  UNUSED(env);
+
   UNUSED(thisObject);
 
-  indcpa_dec(buf, (uint8_t *)ct, (uint8_t *)sk);
+  uint8_t _sk[KYBER_SECRETKEYBYTES] = { 0 };
+  jbyte _skj[KYBER_SECRETKEYBYTES] = { 0 };
+  uint8_t _ct[KYBER_CIPHERTEXTBYTES] = { 0 };
+  jbyte _ctj[KYBER_CIPHERTEXTBYTES] = { 0 };
+  uint8_t _ss[KYBER_SSBYTES] = { 0 };
+  jbyte _ssj[KYBER_SSBYTES] = { 0 };
+
+  (*env)->GetByteArrayRegion(env, sk, 0, KYBER_SECRETKEYBYTES, _skj);
+  (*env)->GetByteArrayRegion(env, ct, 0, KYBER_CIPHERTEXTBYTES, _ctj);
+  (*env)->GetByteArrayRegion(env, ss, 0, KYBER_SSBYTES, _ssj);
+
+  for (size_t ii = 0; ii < KYBER_SECRETKEYBYTES; ii++) _sk[ii] = _skj[ii];
+  for (size_t ii = 0; ii < KYBER_CIPHERTEXTBYTES; ii++) _ct[ii] = _ctj[ii];
+  for (size_t ii = 0; ii < KYBER_SSBYTES; ii++) _ss[ii] = _ssj[ii];
+
+  const uint8_t *pk = (_sk)+KYBER_INDCPA_SECRETKEYBYTES;
+
+
+  indcpa_dec(buf, _ct, _sk);
 
   /* Multitarget countermeasure for coins + contributory KEM */
   for(i=0;i<KYBER_SYMBYTES;i++)
-    buf[KYBER_SYMBYTES+i] = ((uint8_t *)sk)[KYBER_SECRETKEYBYTES-2*KYBER_SYMBYTES+i];
+    buf[KYBER_SYMBYTES+i] = (_sk)[KYBER_SECRETKEYBYTES-2*KYBER_SYMBYTES+i];
   hash_g(kr, buf, 2*KYBER_SYMBYTES);
 
   /* coins are in kr+KYBER_SYMBYTES */
   indcpa_enc(cmp, buf, pk, kr+KYBER_SYMBYTES);
 
-  fail = verify((uint8_t *)ct, cmp, KYBER_CIPHERTEXTBYTES);
+  fail = verify(_ct, cmp, KYBER_CIPHERTEXTBYTES);
 
   /* overwrite coins in kr with H(c) */
-  hash_h(kr+KYBER_SYMBYTES, (uint8_t *)ct, KYBER_CIPHERTEXTBYTES);
+  hash_h(kr+KYBER_SYMBYTES, _ct, KYBER_CIPHERTEXTBYTES);
 
   /* Overwrite pre-k with z on re-encryption failure */
-  cmov(kr, ((uint8_t *)sk)+KYBER_SECRETKEYBYTES-KYBER_SYMBYTES, KYBER_SYMBYTES, fail);
+  cmov(kr, (_sk)+KYBER_SECRETKEYBYTES-KYBER_SYMBYTES, KYBER_SYMBYTES, fail);
 
   /* hash concatenation of pre-k and H(c) to k */
-  kdf((uint8_t *)ss, kr, 2*KYBER_SYMBYTES);
+  kdf(_ss, kr, 2*KYBER_SYMBYTES);
+  for (size_t ii = 0; ii < KYBER_SECRETKEYBYTES; ii++) _skj[ii] = _sk[ii];
+  for (size_t ii = 0; ii < KYBER_CIPHERTEXTBYTES; ii++) _ctj[ii] = _ct[ii];
+  for (size_t ii = 0; ii < KYBER_SSBYTES; ii++) _ssj[ii] = _ss[ii];
+  (*env)->SetByteArrayRegion(env, sk, 0, KYBER_SECRETKEYBYTES, _skj);
+  (*env)->SetByteArrayRegion(env, ct, 0, KYBER_CIPHERTEXTBYTES, _ctj);
+  (*env)->SetByteArrayRegion(env, ss, 0, KYBER_SSBYTES, _ssj);
   return 0;
 }
 

@@ -1,4 +1,4 @@
-set(KYBER_SRCS indcpa.c polyvec.c poly.c ntt.c cbd.c reduce.c verify.c)
+set(KYBER_SRCS indcpa.c polyvec.c poly.c ntt.c cbd.c reduce.c verify.c randombytes.c)
 set(KYBER_FIPS202_SRCS kem.c ${KYBER_SRCS} symmetric-shake.c)
 set(KYBER_NINETIES_SRCS kem_90s.c ${KYBER_SRCS} symmetric-aes.c)
 set(FIPS202_SRCS fips202.c)
@@ -23,8 +23,8 @@ add_library(aes256ctr_ref_jni ${AES256CTR_SRCS})
 add_library(sha2_ref_jni ${SHA2_SRCS})
 
 # Kyber 512
-add_library(kyber512_ref_jni SHARED ${KYBER_FIPS202_SRCS})
-add_library(kyber512_90s_ref_jni SHARED ${KYBER_NINETIES_SRCS})
+add_library(kyber512_ref_jni SHARED ${KYBER_FIPS202_SRCS} ${FIPS202_SRCS})
+add_library(kyber512_90s_ref_jni SHARED ${AES256CTR_SRCS} ${SHA2_SRCS} ${KYBER_NINETIES_SRCS} ${FIPS202_SRCS})
 target_compile_definitions(kyber512_ref_jni PUBLIC KYBER_K=2)
 target_compile_definitions(kyber512_90s_ref_jni PUBLIC KYBER_K=2 KYBER_90S)
 target_link_libraries(kyber512_ref_jni INTERFACE fips202_ref_jni)

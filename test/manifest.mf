@@ -1,0 +1,2 @@
+Main-class: network.beechat.Main
+

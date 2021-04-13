@@ -20,7 +20,7 @@ extern "C" {
  * Signature: ([C[C)I
  */
 JNIEXPORT jint JNICALL Java_network_beechat_Kyber512_190s_crypto_1kem_1keypair
-  (JNIEnv *, jobject, jcharArray, jcharArray);
+  (JNIEnv *, jobject, jbyteArray, jbyteArray);
 
 /*
  * Class:     network_beechat_Kyber512_90s
@@ -28,7 +28,7 @@ JNIEXPORT jint JNICALL Java_network_beechat_Kyber512_190s_crypto_1kem_1keypair
  * Signature: ([C[C[C)I
  */
 JNIEXPORT jint JNICALL Java_network_beechat_Kyber512_190s_crypto_1kem_1enc
-  (JNIEnv *, jobject, jcharArray, jcharArray, jcharArray);
+  (JNIEnv *, jobject, jbyteArray, jbyteArray, jbyteArray);
 
 /*
  * Class:     network_beechat_Kyber512_90s
@@ -36,7 +36,7 @@ JNIEXPORT jint JNICALL Java_network_beechat_Kyber512_190s_crypto_1kem_1enc
  * Signature: ([C[C[C)I
  */
 JNIEXPORT jint JNICALL Java_network_beechat_Kyber512_190s_crypto_1kem_1dec
-  (JNIEnv *, jobject, jcharArray, jcharArray, jcharArray);
+  (JNIEnv *, jobject, jbyteArray, jbyteArray, jbyteArray);
 
 #ifdef __cplusplus
 }
