@@ -1,4 +1,4 @@
-# JNI-PQC
+# kyber-JNI
 
 This repository contains the reference implementation of the [Kyber](https://www.pq-crystals.org/kyber/) key encapsulation mechanism, Post Quantum Cryptography algorithms usable through Java Native Interface wrappers.
 

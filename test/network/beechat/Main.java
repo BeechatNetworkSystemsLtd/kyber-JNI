@@ -1,10 +1,12 @@
 package network.beechat;
 
+import java.io.*;
+import java.util.Scanner;
 import java.nio.charset.StandardCharsets;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         Base58 b58 = new Base58();
         byte[] alice_pk = new byte[Kyber512.KYBER_PUBLICKEYBYTES];
         byte[] alice_sk = new byte[Kyber512.KYBER_SECRETKEYBYTES];
@@ -20,16 +22,37 @@ public class Main {
 
         String testOutput = new String(b58.encode(alice_pk));
         System.out.println("Alice's public key:\n" + testOutput);
+        try (FileWriter writer = new FileWriter("alice.public", false)) {
+            writer.write(testOutput);
+            writer.flush();
+            writer.close();
+        } catch (IOException ex){}
         testOutput = new String(b58.encode(alice_sk));
         System.out.println("\nAlice's secret key:\n" + testOutput);
+        try (FileWriter writer = new FileWriter("alice.secret", false)) {
+            writer.write(testOutput);
+            writer.flush();
+            writer.close();
+        } catch (IOException ex){}
 
         testOutput = new String(b58.encode(bob_pk));
         System.out.println("\nBob's public key:\n" + testOutput);
+        try (FileWriter writer = new FileWriter("bob.public", false)) {
+            writer.write(testOutput);
+            writer.flush();
+            writer.close();
+        } catch (IOException ex){}
         testOutput = new String(b58.encode(bob_sk));
         System.out.println("\nBob's secret key:\n" + testOutput);
+        try (FileWriter writer = new FileWriter("bob.secret", false)) {
+            writer.write(testOutput);
+            writer.flush();
+            writer.close();
+        } catch (IOException ex){}
 
         // Step 2:
-        Kyber512.crypto_kem_enc(ct, bob_skey, alice_pk);
+        Scanner sc = new Scanner(new File("alice.public"));
+        Kyber512.crypto_kem_enc(ct, bob_skey, b58.decode(sc.nextLine()));
         // Step 3:
         Kyber512.crypto_kem_dec(alice_skey, ct, alice_sk);
 
@@ -52,16 +75,37 @@ public class Main {
 
         testOutput = new String(b58.encode(alice_pk));
         System.out.println("Alice's public key:\n" + testOutput);
+        try (FileWriter writer = new FileWriter("alice.public", false)) {
+            writer.write(testOutput);
+            writer.flush();
+            writer.close();
+        } catch (IOException ex){}
         testOutput = new String(b58.encode(alice_sk));
         System.out.println("\nAlice's secret key:\n" + testOutput);
+        try (FileWriter writer = new FileWriter("alice.secret", false)) {
+            writer.write(testOutput);
+            writer.flush();
+            writer.close();
+        } catch (IOException ex){}
 
         testOutput = new String(b58.encode(bob_pk));
         System.out.println("\nBob's public key:\n" + testOutput);
+        try (FileWriter writer = new FileWriter("bob.public", false)) {
+            writer.write(testOutput);
+            writer.flush();
+            writer.close();
+        } catch (IOException ex){}
         testOutput = new String(b58.encode(bob_sk));
         System.out.println("\nBob's secret key:\n" + testOutput);
+        try (FileWriter writer = new FileWriter("bob.secret", false)) {
+            writer.write(testOutput);
+            writer.flush();
+            writer.close();
+        } catch (IOException ex){}
 
         // Step 2:
-        Kyber512_90s.crypto_kem_enc(ct, bob_skey, alice_pk);
+        sc = new Scanner(new File("alice.public"));
+        Kyber512_90s.crypto_kem_enc(ct, bob_skey, b58.decode(sc.nextLine()));
         // Step 3:
         Kyber512_90s.crypto_kem_dec(alice_skey, ct, alice_sk);
 

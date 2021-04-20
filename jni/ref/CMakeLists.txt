@@ -10,7 +10,7 @@ find_package(Java COMPONENTS Development)
 
 if(MSVC)
   add_compile_options(/nologo /O2 /W4 /wd4146 /wd4244)
-  add_compile_options(/I${_JAVA_HOME}\include /I${_JAVA_HOME}\include\linux)
+  add_compile_options(/I${_JAVA_HOME}\include /I${_JAVA_HOME}\include\win32)
 else()
   add_compile_options(-I${_JAVA_HOME}/include -I${_JAVA_HOME}/include/linux)
   add_compile_options(-Wall -fPIC -Wextra -Wpedantic -Werror)
