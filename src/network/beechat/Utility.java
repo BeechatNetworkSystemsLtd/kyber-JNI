@@ -193,13 +193,33 @@ public class Utility {
             return;
         }
         else if (command.equals("help")){
-            System.out.println("Commands available:\n" +
-                    "createkeys: creates .secret and .public keys. For example: createkeys followed by 'test' will " +
-                    "output 'test.public' and 'test.secret'.\n" +
-                    "encryptfile: encrypt a file with a public key. For example: encryptfile test.txt will output" +
-                    " an encrypted file and the encrypted password (ct.key). Both must be sent to the recipient.\n" +
-                    "decryptfile: decrypt a file with a secret key. For example, test.encrypted, ct.key and your " +
-                    "private key are used to decrypt the file.");
+            System.out.println("Commands available:\n\n" +
+                    "createkeys: creates .secret and .public keys. " +
+                    "\nFor example: " +
+                    "\n(1) type createkeys, then press [ENTER]" +
+                    " \n(2) type test, then press [ENTER]. " +
+                    "\nThis will output two files: test.public and test.secret.\n\n" +
+
+                    "encryptfile: encrypts a file with a given public key. " +
+                    "\nFor example: " +
+                    "\n(1) type encryptfile, then press [ENTER]" +
+                    "\n(2) type the public key's filename, such as bob.public" +
+                    "\n(3) type the filename of the file to encrypt, such as textfile.txt" +
+                    "\n(4) type the encrypted file output name, such as textfile.encrypted" +
+                    "\n(5) type in yes or no. 'yes' if you want the program to ZIP the encrypted file and ct.key " +
+                    "together (this makes it easier for sending). Type in 'no' if you do not need that."+
+                    "\nThis will output an encrypted file and the encrypted password (ct.key). " +
+                    "Both must be sent to the recipient.\n" +
+                    "NOTE: the file to encrypt and public key must be in the working directory.\n\n" +
+
+                    "decryptfile: decrypt a file with a secret key. " +
+                    "\nFor example: " +
+                    "\n(1) type in decryptfile, then press [ENTER]" +
+                    "\n(2) type in the secret key's filename, such as bob.secret" +
+                    "\n(3) type in the filename of the file to decrypt, such as textfile.encrypted "+
+                    "\n(4) type in what the decrypted filename will be, such as textfile.txt"+
+                    "NOTE: the file to decrypt and private key must be in the working directory.\n\n"
+            );
         }
         else if (command.equals("exit")) {System.exit(0);}
 
