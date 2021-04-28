@@ -8,9 +8,17 @@ set(SHA2_SRCS sha256.c sha512.c)
 find_package(Java)
 find_package(Java COMPONENTS Development)
 
+
 if(MSVC)
+  add_compile_options(/I${_JAVA_HOME}\\include /I${_JAVA_HOME}\\include\\win32)
   add_compile_options(/nologo /O2 /W4 /wd4146 /wd4244)
-  add_compile_options(/I${_JAVA_HOME}\include /I${_JAVA_HOME}\include\win32)
+endif()
+
+if(MSYS OR MINGW)
+  add_compile_options(-I${_JAVA_HOME}\\include -I${_JAVA_HOME}\\include\\win32)
+  add_compile_options(-Wall -fPIC -Wextra -Wpedantic -Werror)
+  add_compile_options(-Wmissing-prototypes -Wredundant-decls -Wshadow -Wpointer-arith)
+  add_compile_options(-O3 -fomit-frame-pointer)
 else()
   add_compile_options(-I${_JAVA_HOME}/include -I${_JAVA_HOME}/include/linux)
   add_compile_options(-Wall -fPIC -Wextra -Wpedantic -Werror)
@@ -44,7 +52,15 @@ if (MSVC)
     COMMAND ${CMAKE_COMMAND} -E copy "kyber512_90s_ref_jni.dll" "${CMAKE_BINARY_DIR}/Release"
     COMMENT "Making Release: kyber512_90s_ref_jni.dll"
   )
-else()
+endif()
+if (MSYS OR MINGW)
+  add_custom_command(
+    TARGET kyber512_90s_ref_jni POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy "libkyber512_90s_ref_jni.dll" "${CMAKE_BINARY_DIR}/Release"
+    COMMENT "Making Release: libkyber512_90s_ref_jni.dll"
+  )
+endif()
+if(UNIX)
   add_custom_command(
     TARGET kyber512_90s_ref_jni POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy "libkyber512_90s_ref_jni.so" "${CMAKE_BINARY_DIR}/Release"
@@ -58,7 +74,15 @@ if (MSVC)
     COMMAND ${CMAKE_COMMAND} -E copy "kyber512_ref_jni.dll" "${CMAKE_BINARY_DIR}/Release"
     COMMENT "Making Release: kyber512_ref_jni.dll"
   )
-else()
+endif()
+if (MSYS OR MINGW)
+  add_custom_command(
+    TARGET kyber512_ref_jni POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy "libkyber512_ref_jni.dll" "${CMAKE_BINARY_DIR}/Release"
+    COMMENT "Making Release: libkyber512_ref_jni.dll"
+  )
+endif()
+if (UNIX)
   add_custom_command(
     TARGET kyber512_ref_jni POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy "libkyber512_ref_jni.so" "${CMAKE_BINARY_DIR}/Release"
@@ -66,7 +90,7 @@ else()
   )
 endif()
 
-if (MSVC)
+if (MSVC OR MSYS OR MINGW)
   add_custom_command(
     TARGET kyber512_ref_jni POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/jni/java/ref_win" "${CMAKE_BINARY_DIR}/Release/ref"
