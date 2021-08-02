@@ -50,6 +50,15 @@ static {
 The necessary shared libraries are placed in `/build/Release` directory. It is not necessary to use all classes (with `_90s` and without). Just choose what you want to use.
 
 
+## For Android Test
 
+Paste this commands:
 
+```bash
+cd test/android
+./build_apk.sh
+```
+
+Result APK will be test/android/build/KyberTest.apk.
+Just install and run.
 
