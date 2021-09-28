@@ -8,7 +8,7 @@ public class Kyber512 {
     static final int KYBER_CIPHERTEXTBYTES = 768;
 
     static {
-        System.loadLibrary("libkyber512_ref_jni");
+        System.loadLibrary("kyber512_ref_jni");
     }
 
     // Declare a native methods of kyber512
